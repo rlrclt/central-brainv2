@@ -1,0 +1,16 @@
+{
+  "name": "central-brain-skills",
+  "version": "0.1.0",
+  "description": "CLI installer for Central Brain AI skills",
+  "type": "module",
+  "bin": {
+    "central-brain-skills": "./bin/central-brain-skills.js"
+  },
+  "files": [
+    "bin",
+    "skills"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}

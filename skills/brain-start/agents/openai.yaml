@@ -1,0 +1,8 @@
+interface:
+  display_name: "Brain Start"
+  short_description: "Onboard an AI into Central Brain"
+  brand_color: "#FF8F5A"
+  default_prompt: "Use $brain-start to onboard into Central Brain before starting work."
+
+policy:
+  allow_implicit_invocation: true
