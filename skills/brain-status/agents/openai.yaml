@@ -1,0 +1,8 @@
+interface:
+  display_name: "Brain Status"
+  short_description: "Check Central Brain health and counts"
+  brand_color: "#71D7FF"
+  default_prompt: "Use $brain-status to report Central Brain health and high-level system counts."
+
+policy:
+  allow_implicit_invocation: true

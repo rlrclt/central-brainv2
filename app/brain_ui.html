@@ -1,126 +1,149 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Central Brain Map</title>
   <style>
     :root {
-      --bg: #08111f;
-      --bg2: #101f34;
-      --panel: rgba(10, 18, 32, 0.82);
-      --text: #edf4ff;
-      --muted: #9cb4d1;
-      --line: rgba(130, 180, 255, 0.22);
-      --core: #ff8f5a;
-      --agent: #65d6ff;
-      --session: #86efac;
-      --memory: #f8c565;
-      --workflow: #e7a6ff;
+      --bg: #06111b;
+      --bg2: #0d2133;
+      --panel: rgba(8, 17, 28, 0.76);
+      --line: rgba(122, 206, 255, 0.18);
+      --text: #eef6ff;
+      --muted: #98adc4;
+      --core: #ff8b6a;
+      --agent: #71d7ff;
+      --session: #8de0b2;
+      --memory: #ffd66e;
+      --workflow: #d8a5ff;
+      --shell: rgba(255, 184, 168, 0.07);
+      --shell-line: rgba(255, 206, 190, 0.22);
     }
 
     * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
     body {
-      margin: 0;
-      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      font-family: "Avenir Next", "SF Pro Display", "Segoe UI", sans-serif;
       color: var(--text);
       background:
-        radial-gradient(circle at 20% 20%, rgba(70, 130, 255, 0.22), transparent 28%),
-        radial-gradient(circle at 80% 15%, rgba(255, 143, 90, 0.18), transparent 25%),
-        radial-gradient(circle at 50% 80%, rgba(120, 255, 200, 0.14), transparent 30%),
+        radial-gradient(circle at 20% 10%, rgba(80, 170, 255, 0.16), transparent 26%),
+        radial-gradient(circle at 80% 10%, rgba(255, 139, 106, 0.13), transparent 24%),
+        radial-gradient(circle at 50% 100%, rgba(122, 255, 206, 0.10), transparent 30%),
         linear-gradient(180deg, var(--bg), var(--bg2));
-      min-height: 100vh;
-      overflow: hidden;
     }
 
-    .shell {
+    .app {
       display: grid;
-      grid-template-columns: 1fr 360px;
+      grid-template-columns: minmax(0, 1fr) 360px;
       min-height: 100vh;
     }
 
     .main {
       position: relative;
-      padding: 24px;
+      padding: 20px 20px 18px;
       overflow: hidden;
     }
 
-    .hud {
+    .topbar {
       position: absolute;
-      top: 20px;
-      left: 20px;
-      z-index: 3;
+      top: 18px;
+      left: 18px;
+      right: 18px;
+      z-index: 4;
       display: flex;
-      gap: 12px;
+      align-items: stretch;
+      justify-content: space-between;
+      gap: 14px;
       flex-wrap: wrap;
-      max-width: calc(100% - 40px);
     }
 
-    .card, .side {
+    .titlecard, .statcard, .sidebar {
       background: var(--panel);
-      backdrop-filter: blur(16px);
+      backdrop-filter: blur(18px);
       border: 1px solid rgba(255,255,255,0.08);
-      box-shadow: 0 20px 50px rgba(0,0,0,0.28);
+      box-shadow: 0 24px 60px rgba(0,0,0,0.28);
     }
 
-    .card {
-      border-radius: 16px;
-      padding: 12px 14px;
-      min-width: 110px;
+    .titlecard {
+      min-width: 280px;
+      max-width: 460px;
+      padding: 16px 18px;
+      border-radius: 20px;
     }
 
-    .card .label {
-      color: var(--muted);
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    .card .value {
-      font-size: 26px;
-      font-weight: 700;
-      margin-top: 4px;
-    }
-
-    .titlebox {
-      min-width: 250px;
-      padding-right: 18px;
-    }
-
-    .titlebox h1 {
+    .titlecard h1 {
       margin: 0;
       font-size: 28px;
       letter-spacing: 0.02em;
     }
 
-    .titlebox p {
+    .titlecard p {
       margin: 6px 0 0;
       color: var(--muted);
-      line-height: 1.4;
+      line-height: 1.45;
     }
 
-    .canvas-wrap {
+    .stats {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .statcard {
+      min-width: 122px;
+      padding: 12px 14px;
+      border-radius: 16px;
+    }
+
+    .statcard .label {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+    }
+
+    .statcard .value {
+      margin-top: 6px;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .canvas {
       position: absolute;
       inset: 0;
-      padding: 110px 24px 24px;
+      padding: 116px 18px 18px;
     }
 
-    .brain-stage {
+    .stage {
       position: relative;
+      width: 100%;
       height: 100%;
-      border-radius: 28px;
       overflow: hidden;
+      border-radius: 30px;
       background:
-        radial-gradient(circle at center, rgba(120, 170, 255, 0.12), transparent 30%),
-        linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+        radial-gradient(circle at 50% 48%, rgba(255, 200, 180, 0.05), transparent 18%),
+        radial-gradient(circle at 50% 54%, rgba(110, 202, 255, 0.08), transparent 34%),
+        linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
       border: 1px solid rgba(255,255,255,0.06);
     }
 
-    svg {
+    .brain-shell {
+      position: absolute;
+      inset: 24px 30px 26px;
+      width: calc(100% - 60px);
+      height: calc(100% - 50px);
+      pointer-events: none;
+      opacity: 0.95;
+    }
+
+    .links {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
+      pointer-events: none;
     }
 
     .nodes {
@@ -132,16 +155,17 @@
       position: absolute;
       transform: translate(-50%, -50%);
       border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.30);
       cursor: pointer;
-      border: 1px solid rgba(255,255,255,0.28);
-      box-shadow: 0 0 0 0 rgba(255,255,255,0.12), 0 0 24px rgba(255,255,255,0.12);
+      box-shadow: 0 0 0 0 rgba(255,255,255,0.08), 0 0 28px rgba(255,255,255,0.08);
       transition: transform 120ms ease, box-shadow 120ms ease, opacity 120ms ease;
-      animation: pulse 3.6s infinite ease-in-out;
+      animation: pulse 3.5s ease-in-out infinite;
     }
 
-    .node:hover, .node.active {
-      transform: translate(-50%, -50%) scale(1.15);
-      box-shadow: 0 0 0 10px rgba(255,255,255,0.03), 0 0 32px rgba(255,255,255,0.22);
+    .node:hover,
+    .node.active {
+      transform: translate(-50%, -50%) scale(1.12);
+      box-shadow: 0 0 0 12px rgba(255,255,255,0.03), 0 0 34px rgba(255,255,255,0.22);
     }
 
     .node.core { background: var(--core); }
@@ -150,30 +174,45 @@
     .node.memory { background: var(--memory); }
     .node.workflow { background: var(--workflow); }
 
-    .tag {
+    .node-label {
       position: absolute;
       top: calc(100% + 8px);
       left: 50%;
       transform: translateX(-50%);
       white-space: nowrap;
       font-size: 11px;
-      color: rgba(237, 244, 255, 0.88);
+      letter-spacing: 0.02em;
+      color: rgba(241, 247, 255, 0.9);
+      pointer-events: none;
+      text-shadow: 0 1px 12px rgba(0,0,0,0.4);
+    }
+
+    .hemisphere-tag {
+      position: absolute;
+      top: 122px;
+      font-size: 12px;
+      color: rgba(219, 236, 255, 0.48);
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
       pointer-events: none;
     }
 
+    .hemisphere-tag.left { left: 72px; }
+    .hemisphere-tag.right { right: 72px; }
+
     .legend {
       position: absolute;
-      right: 18px;
-      bottom: 18px;
-      z-index: 2;
-      padding: 10px 12px;
-      border-radius: 14px;
-      background: rgba(7, 13, 24, 0.74);
+      left: 24px;
+      bottom: 22px;
+      z-index: 3;
+      display: grid;
+      gap: 8px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(7, 13, 24, 0.70);
       border: 1px solid rgba(255,255,255,0.08);
       font-size: 12px;
       color: var(--muted);
-      display: grid;
-      gap: 8px;
     }
 
     .legend span {
@@ -189,54 +228,60 @@
       display: inline-block;
     }
 
-    .side {
+    .sidebar {
       padding: 22px 18px;
       border-left: 1px solid rgba(255,255,255,0.08);
       overflow: auto;
     }
 
-    .side h2 {
-      margin: 0 0 8px;
-      font-size: 22px;
+    .sidebar h2 {
+      margin: 0;
+      font-size: 24px;
     }
 
-    .side p {
+    .sidebar .sub {
+      margin: 8px 0 0;
       color: var(--muted);
       line-height: 1.5;
     }
 
-    .detail {
+    .meta {
       margin-top: 18px;
       display: grid;
       gap: 10px;
     }
 
-    .detail-row {
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 14px;
+    .meta-item {
       padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.08);
       background: rgba(255,255,255,0.03);
     }
 
-    .detail-row strong {
+    .meta-item strong {
       display: block;
-      color: #fff;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
       font-size: 12px;
       text-transform: uppercase;
       letter-spacing: 0.08em;
+      color: #ffffff;
     }
 
-    .detail-row code {
-      color: #d9e7ff;
+    .meta-item code {
+      color: #dce9ff;
       font-size: 12px;
       word-break: break-word;
     }
 
-    .hint {
-      margin-top: 22px;
-      font-size: 13px;
+    .notes {
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 16px;
       color: var(--muted);
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      line-height: 1.55;
+      font-size: 13px;
     }
 
     @keyframes pulse {
@@ -244,31 +289,80 @@
       50% { opacity: 1; }
     }
 
-    @media (max-width: 960px) {
-      body { overflow: auto; }
-      .shell { grid-template-columns: 1fr; }
+    @media (max-width: 1040px) {
+      .app { grid-template-columns: 1fr; }
       .main { min-height: 72vh; }
-      .side { min-height: 28vh; }
+      .sidebar { min-height: 28vh; }
+      .hemisphere-tag { display: none; }
     }
   </style>
 </head>
 <body>
-  <div class="shell">
+  <div class="app">
     <section class="main">
-      <div class="hud">
-        <div class="card titlebox">
-          <h1>Central Brain Map</h1>
-          <p>ภาพรวมความจำ, sessions, agents, และ workflows ในสมองกลาง</p>
+      <div class="topbar">
+        <div class="titlecard">
+          <h1>Central Brain</h1>
+          <p>ภาพรวมของความจำ, sessions, agents และ workflows ที่จัดวางเป็นสมองสองซีกเพื่อให้ดู pattern ของระบบได้ง่ายขึ้น</p>
         </div>
-        <div class="card"><div class="label">Sessions</div><div class="value" id="sessionsCount">0</div></div>
-        <div class="card"><div class="label">Memory Keys</div><div class="value" id="memoryCount">0</div></div>
-        <div class="card"><div class="label">Agents</div><div class="value" id="agentsCount">0</div></div>
-        <div class="card"><div class="label">Workflows</div><div class="value" id="workflowsCount">0</div></div>
+        <div class="stats">
+          <div class="statcard">
+            <div class="label">Agents</div>
+            <div class="value" id="agentsCount">0</div>
+          </div>
+          <div class="statcard">
+            <div class="label">Sessions</div>
+            <div class="value" id="sessionsCount">0</div>
+          </div>
+          <div class="statcard">
+            <div class="label">Memory Keys</div>
+            <div class="value" id="memoryCount">0</div>
+          </div>
+          <div class="statcard">
+            <div class="label">Workflows</div>
+            <div class="value" id="workflowCount">0</div>
+          </div>
+        </div>
       </div>
 
-      <div class="canvas-wrap">
-        <div class="brain-stage" id="stage">
-          <svg id="links" viewBox="0 0 1000 700" preserveAspectRatio="none"></svg>
+      <div class="canvas">
+        <div class="stage" id="stage">
+          <div class="hemisphere-tag left">Left Hemisphere</div>
+          <div class="hemisphere-tag right">Right Hemisphere</div>
+          <svg class="brain-shell" viewBox="0 0 1000 700" preserveAspectRatio="none" aria-hidden="true">
+            <defs>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="8" result="coloredBlur" />
+                <feMerge>
+                  <feMergeNode in="coloredBlur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+            <path d="M490 120
+                     C390 40, 220 80, 170 220
+                     C120 360, 170 530, 320 585
+                     C390 610, 458 580, 486 530
+                     C468 470, 462 410, 468 354
+                     C474 302, 480 242, 490 120Z"
+                  fill="var(--shell)" stroke="var(--shell-line)" stroke-width="2" filter="url(#glow)"/>
+            <path d="M510 120
+                     C610 40, 780 80, 830 220
+                     C880 360, 830 530, 680 585
+                     C610 610, 542 580, 514 530
+                     C532 470, 538 410, 532 354
+                     C526 302, 520 242, 510 120Z"
+                  fill="var(--shell)" stroke="var(--shell-line)" stroke-width="2" filter="url(#glow)"/>
+            <path d="M500 116 C496 208, 494 286, 500 352 C506 430, 504 496, 500 580"
+                  fill="none" stroke="rgba(255,218,204,0.24)" stroke-width="2" stroke-dasharray="5 8"/>
+            <path d="M242 188 C320 152, 392 178, 452 222" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
+            <path d="M228 292 C318 250, 392 276, 454 332" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
+            <path d="M238 406 C334 368, 402 402, 458 458" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
+            <path d="M758 188 C680 152, 608 178, 548 222" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
+            <path d="M772 292 C682 250, 608 276, 546 332" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
+            <path d="M762 406 C666 368, 598 402, 542 458" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
+          </svg>
+          <svg class="links" id="links"></svg>
           <div class="nodes" id="nodes"></div>
           <div class="legend">
             <span><i class="dot" style="background: var(--core)"></i> Core</span>
@@ -281,114 +375,133 @@
       </div>
     </section>
 
-    <aside class="side">
-      <h2 id="detailTitle">สมองกลางพร้อมใช้งาน</h2>
-      <p id="detailText">คลิกจุดใดก็ได้เพื่อดูรายละเอียดของ node นั้น เช่น memory key, session, agent หรือ workflow</p>
-      <div class="detail" id="detailList"></div>
-      <div class="hint">แนะนำให้เปิดหน้านี้หลังเริ่มมี session และ memory แล้ว ภาพจะชัดขึ้นทันที</div>
+    <aside class="sidebar">
+      <h2 id="detailTitle">Brain Overview</h2>
+      <p class="sub" id="detailType">คลิก node ในสมองเพื่อดูรายละเอียดโดยไม่ต้องไล่อ่าน JSON ด้วยตัวเอง</p>
+      <div class="meta" id="detailMeta"></div>
+      <div class="notes">
+        แนวจัดวาง:
+        agents อยู่ใกล้แกนกลาง,
+        sessions อยู่กลางสมองสองซีก,
+        memory กระจายรอบนอกเหมือนรอยพับ,
+        workflows อยู่ช่วงล่างคล้าย brain stem coordination layer
+      </div>
     </aside>
   </div>
 
   <script>
     const stage = document.getElementById("stage");
-    const nodesEl = document.getElementById("nodes");
     const linksEl = document.getElementById("links");
+    const nodesEl = document.getElementById("nodes");
     const detailTitle = document.getElementById("detailTitle");
-    const detailText = document.getElementById("detailText");
-    const detailList = document.getElementById("detailList");
-    let activeNodeId = null;
+    const detailType = document.getElementById("detailType");
+    const detailMeta = document.getElementById("detailMeta");
+    let activeId = null;
 
-    function short(text, size = 26) {
-      if (!text) return "";
-      return text.length > size ? `${text.slice(0, size - 1)}…` : text;
-    }
-
-    function updateStats(stats) {
+    function setStats(stats) {
+      document.getElementById("agentsCount").textContent = stats.agents ?? 0;
       document.getElementById("sessionsCount").textContent = stats.sessions ?? 0;
       document.getElementById("memoryCount").textContent = stats.memory_keys ?? 0;
-      document.getElementById("agentsCount").textContent = stats.agents ?? 0;
-      document.getElementById("workflowsCount").textContent = stats.workflows ?? 0;
+      document.getElementById("workflowCount").textContent = stats.workflows ?? 0;
     }
 
-    function detailRows(details) {
-      return Object.entries(details || {})
-        .map(([key, value]) => {
-          const rendered = Array.isArray(value) ? value.join(", ") : String(value);
-          return `<div class="detail-row"><strong>${key}</strong><code>${rendered}</code></div>`;
-        })
-        .join("");
+    function metaHtml(details = {}) {
+      return Object.entries(details).map(([key, value]) => {
+        const text = Array.isArray(value) ? value.join(", ") : String(value);
+        return `<div class="meta-item"><strong>${key}</strong><code>${text}</code></div>`;
+      }).join("");
     }
 
-    function renderDetails(node) {
+    function showNode(node) {
       detailTitle.textContent = node.label;
-      detailText.textContent = `ชนิด: ${node.type}`;
-      detailList.innerHTML = detailRows(node.details);
+      detailType.textContent = `ชนิดข้อมูล: ${node.type}`;
+      detailMeta.innerHTML = metaHtml(node.details || {});
     }
 
-    function lineColor(kind) {
-      if (kind === "memory") return "rgba(248, 197, 101, 0.32)";
-      if (kind === "workflow") return "rgba(231, 166, 255, 0.28)";
-      if (kind === "agent") return "rgba(101, 214, 255, 0.26)";
-      return "rgba(134, 239, 172, 0.18)";
+    function short(text, max = 24) {
+      if (!text) return "";
+      return text.length > max ? `${text.slice(0, max - 1)}…` : text;
+    }
+
+    function placeGroup(items, anchorX, centerY, radiusX, radiusY, side, yShift = 0) {
+      const out = {};
+      items.forEach((node, index) => {
+        const t = (index + 1) / (items.length + 1);
+        const angle = -1.15 + (2.3 * t);
+        const x = anchorX + Math.cos(angle) * radiusX + (side === "left" ? -12 : 12);
+        const y = centerY + yShift + Math.sin(angle) * radiusY;
+        out[node.id] = { x, y };
+      });
+      return out;
     }
 
     function buildLayout(data) {
       const width = stage.clientWidth;
       const height = stage.clientHeight;
       const centerX = width / 2;
-      const centerY = height / 2;
+      const centerY = height / 2 + 10;
+      const leftX = width * 0.34;
+      const rightX = width * 0.66;
       const positions = {};
-
-      const group = (type) => data.nodes.filter((node) => node.type === type);
-      const placeArc = (items, side, radiusX, radiusY, yBias = 0) => {
-        items.forEach((node, index) => {
-          const t = (index + 1) / (items.length + 1);
-          const angle = (-1.2 + 2.4 * t);
-          const xBase = side === "left" ? centerX - radiusX : centerX + radiusX;
-          const x = xBase + Math.cos(angle) * 90;
-          const y = centerY + Math.sin(angle) * radiusY + yBias;
-          positions[node.id] = { x, y };
-        });
-      };
 
       const core = data.nodes.find((node) => node.type === "core");
       if (core) positions[core.id] = { x: centerX, y: centerY };
 
-      const agents = group("agent");
-      const sessions = group("session");
-      const memory = group("memory");
-      const workflows = group("workflow");
+      const agents = data.nodes.filter((node) => node.type === "agent");
+      const sessions = data.nodes.filter((node) => node.type === "session");
+      const memory = data.nodes.filter((node) => node.type === "memory");
+      const workflows = data.nodes.filter((node) => node.type === "workflow");
 
-      placeArc(agents.filter((_, i) => i % 2 === 0), "left", 190, 210, -20);
-      placeArc(agents.filter((_, i) => i % 2 === 1), "right", 190, 210, -20);
-      placeArc(sessions.filter((_, i) => i % 2 === 0), "left", 320, 250, 40);
-      placeArc(sessions.filter((_, i) => i % 2 === 1), "right", 320, 250, 40);
-      placeArc(memory.filter((_, i) => i % 2 === 0), "left", 420, 280, -80);
-      placeArc(memory.filter((_, i) => i % 2 === 1), "right", 420, 280, -80);
+      const leftAgents = agents.filter((_, index) => index % 2 === 0);
+      const rightAgents = agents.filter((_, index) => index % 2 === 1);
+      Object.assign(positions, placeGroup(leftAgents, leftX, centerY - 18, 78, 160, "left"));
+      Object.assign(positions, placeGroup(rightAgents, rightX, centerY - 18, 78, 160, "right"));
+
+      const leftSessions = sessions.filter((_, index) => index % 2 === 0);
+      const rightSessions = sessions.filter((_, index) => index % 2 === 1);
+      Object.assign(positions, placeGroup(leftSessions, leftX, centerY + 10, 145, 205, "left", 12));
+      Object.assign(positions, placeGroup(rightSessions, rightX, centerY + 10, 145, 205, "right", 12));
+
+      const leftMemory = memory.filter((_, index) => index % 2 === 0);
+      const rightMemory = memory.filter((_, index) => index % 2 === 1);
+      Object.assign(positions, placeGroup(leftMemory, leftX - 8, centerY, 214, 250, "left", -24));
+      Object.assign(positions, placeGroup(rightMemory, rightX + 8, centerY, 214, 250, "right", -24));
+
       workflows.forEach((node, index) => {
-        const step = (index + 1) / (workflows.length + 1 || 1);
-        positions[node.id] = { x: centerX - 220 + step * 440, y: height - 90 };
+        const t = (index + 1) / (workflows.length + 1);
+        positions[node.id] = {
+          x: width * 0.26 + t * width * 0.48,
+          y: height - 88
+        };
       });
 
       return positions;
     }
 
+    function strokeFor(kind) {
+      if (kind === "memory") return "rgba(255, 214, 110, 0.28)";
+      if (kind === "workflow") return "rgba(216, 165, 255, 0.28)";
+      if (kind === "agent") return "rgba(113, 215, 255, 0.26)";
+      return "rgba(141, 224, 178, 0.18)";
+    }
+
     function render(data) {
-      updateStats(data.stats);
+      setStats(data.stats || {});
       const positions = buildLayout(data);
       linksEl.innerHTML = "";
       nodesEl.innerHTML = "";
 
       data.edges.forEach((edge) => {
-        const a = positions[edge.source];
-        const b = positions[edge.target];
-        if (!a || !b) return;
-        const mx = (a.x + b.x) / 2;
-        const my = Math.min(a.y, b.y) - Math.abs(a.x - b.x) * 0.08;
+        const from = positions[edge.source];
+        const to = positions[edge.target];
+        if (!from || !to) return;
+        const curveLift = edge.kind === "workflow" ? 18 : 48;
+        const cx = (from.x + to.x) / 2;
+        const cy = Math.min(from.y, to.y) - curveLift;
         const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        path.setAttribute("d", `M ${a.x} ${a.y} Q ${mx} ${my} ${b.x} ${b.y}`);
+        path.setAttribute("d", `M ${from.x} ${from.y} Q ${cx} ${cy} ${to.x} ${to.y}`);
         path.setAttribute("fill", "none");
-        path.setAttribute("stroke", lineColor(edge.kind));
+        path.setAttribute("stroke", strokeFor(edge.kind));
         path.setAttribute("stroke-width", edge.kind === "agent" ? "1.8" : "1.2");
         path.setAttribute("stroke-linecap", "round");
         linksEl.appendChild(path);
@@ -397,6 +510,7 @@
       data.nodes.forEach((node) => {
         const point = positions[node.id];
         if (!point) return;
+
         const el = document.createElement("button");
         el.className = `node ${node.type}`;
         el.style.left = `${point.x}px`;
@@ -404,26 +518,43 @@
         el.style.width = `${node.size}px`;
         el.style.height = `${node.size}px`;
         el.title = `${node.label} (${node.type})`;
-        if (node.id === activeNodeId) el.classList.add("active");
-        const showTag = node.type !== "session" || node.size >= 16;
-        el.innerHTML = showTag ? `<span class="tag">${short(node.label)}</span>` : "";
+        if (activeId === node.id) {
+          el.classList.add("active");
+        }
+
+        if (node.type !== "memory" || node.size >= 12) {
+          const label = document.createElement("span");
+          label.className = "node-label";
+          label.textContent = short(node.label, node.type === "session" ? 18 : 24);
+          el.appendChild(label);
+        }
+
         el.addEventListener("click", () => {
-          activeNodeId = node.id;
+          activeId = node.id;
           document.querySelectorAll(".node").forEach((item) => item.classList.remove("active"));
           el.classList.add("active");
-          renderDetails(node);
+          showNode(node);
         });
+
         nodesEl.appendChild(el);
       });
 
-      const preferred = data.nodes.find((node) => node.type === "core");
-      if (preferred) renderDetails(preferred);
+      const core = data.nodes.find((node) => node.type === "core");
+      if (core) {
+        showNode(core);
+      }
     }
 
     async function load() {
-      const res = await fetch("/brain/data");
-      const data = await res.json();
-      render(data);
+      try {
+        const response = await fetch("/brain/data");
+        const data = await response.json();
+        render(data);
+      } catch (error) {
+        detailTitle.textContent = "Brain Offline";
+        detailType.textContent = "โหลดข้อมูลจาก /brain/data ไม่สำเร็จ";
+        detailMeta.innerHTML = `<div class="meta-item"><strong>error</strong><code>${String(error)}</code></div>`;
+      }
     }
 
     load();

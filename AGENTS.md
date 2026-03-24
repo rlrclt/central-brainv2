@@ -17,3 +17,9 @@ Git history is not available in this workspace snapshot, so no repository-specif
 
 ## Security & Configuration Tips
 Copy `.env.example` to `.env` and never commit real keys. Treat `data/brain.db` as local state, not source. If you change ports, URLs, or agent settings, update both `config.py` and the setup docs.
+
+## Available Skills
+This repository now includes installable AI skills under `skills/`.
+
+- `brain-start`: onboarding skill that teaches an AI what Central Brain is, what files or bundled references to read first, and the minimum workflow for session, context, and reply handling.
+- `brain-status`: status-report skill for humans; it checks or explains how to check Central Brain health, `/brain/data`, and high-level counts without dumping raw memory or context.
