@@ -7,17 +7,40 @@ import path from "node:path";
 const repoRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
 const skillsRoot = path.join(repoRoot, "skills");
 
+const TARGETS = {
+  codex: {
+    label: "Codex",
+    root: path.join(os.homedir(), ".codex"),
+    skillsDir: path.join(os.homedir(), ".codex", "skills")
+  },
+  claude: {
+    label: "Claude",
+    root: path.join(os.homedir(), ".claude"),
+    skillsDir: path.join(os.homedir(), ".claude", "skills")
+  },
+  gemini: {
+    label: "Gemini",
+    root: path.join(os.homedir(), ".gemini"),
+    skillsDir: path.join(os.homedir(), ".gemini", "skills")
+  }
+};
+
 function printHelp() {
   console.log(`Central Brain Skills
 
 Usage:
-  central-brain-skills list
-  central-brain-skills install [-g] [-y] [--skill brain-start] [--dest PATH]
+  brain-skills list
+  brain-skills list-targets
+  brain-skills status
+  brain-skills install -g -y
+  brain-skills install --target codex,claude,gemini --skill brain-start
+  brain-skills install --dest PATH --skill brain-start
 
 Notes:
-  - -g is accepted for compatibility and installs into ~/.codex/skills by default
+  - install -g installs into supported AI folders under ~/.codex, ~/.claude, ~/.gemini
   - -y skips overwrite prompts
-  - If --skill is omitted, all bundled skills are installed
+  - --target accepts a comma-separated list
+  - --dest installs to one explicit path instead of AI-specific folders
 `);
 }
 
@@ -39,7 +62,8 @@ function parseArgs(argv) {
     yes: false,
     global: false,
     skill: null,
-    dest: path.join(os.homedir(), ".codex", "skills")
+    dest: null,
+    targets: []
   };
 
   for (let i = 3; i < argv.length; i += 1) {
@@ -52,7 +76,13 @@ function parseArgs(argv) {
       args.skill = argv[i + 1] || null;
       i += 1;
     } else if (token === "--dest") {
-      args.dest = argv[i + 1] || args.dest;
+      args.dest = argv[i + 1] || null;
+      i += 1;
+    } else if (token === "--target" || token === "--targets") {
+      args.targets = (argv[i + 1] || "")
+        .split(",")
+        .map((value) => value.trim().toLowerCase())
+        .filter(Boolean);
       i += 1;
     }
   }
@@ -66,6 +96,20 @@ function ensureDir(dirPath) {
 
 function copyDir(source, target) {
   fs.cpSync(source, target, { recursive: true, force: true });
+}
+
+function resolveTargets(args) {
+  if (args.dest) {
+    return [{ key: "custom", label: "Custom", skillsDir: args.dest, root: path.dirname(args.dest) }];
+  }
+
+  const requested = args.targets.length > 0 ? args.targets : (args.global ? Object.keys(TARGETS) : ["codex"]);
+  return requested.map((name) => {
+    if (!TARGETS[name]) {
+      throw new Error(`Unknown target: ${name}`);
+    }
+    return { key: name, ...TARGETS[name] };
+  });
 }
 
 function installSkill(skillName, destRoot, yes) {
@@ -82,7 +126,65 @@ function installSkill(skillName, destRoot, yes) {
 
   ensureDir(destRoot);
   copyDir(source, target);
-  console.log(`Installed ${skillName} -> ${target}`);
+  return target;
+}
+
+function printAvailableSkills(skills) {
+  if (skills.length === 0) {
+    console.log("No skills bundled in this package.");
+    return;
+  }
+
+  console.log("Available Central Brain skills:");
+  for (const skill of skills) {
+    console.log(`- ${skill}`);
+  }
+}
+
+function printTargets() {
+  console.log("Supported AI targets:");
+  for (const [key, target] of Object.entries(TARGETS)) {
+    console.log(`- ${key}: ${target.skillsDir}`);
+  }
+}
+
+function targetStatus(skills) {
+  console.log("Central Brain skill status:");
+  for (const [key, target] of Object.entries(TARGETS)) {
+    const rootExists = fs.existsSync(target.root);
+    const installedSkills = skills.filter((skill) => fs.existsSync(path.join(target.skillsDir, skill)));
+    const installedText = installedSkills.length > 0 ? installedSkills.join(", ") : "none";
+    console.log(`- ${key} (${target.label})`);
+    console.log(`  root: ${target.root} ${rootExists ? "[present]" : "[missing]"}`);
+    console.log(`  skills: ${target.skillsDir}`);
+    console.log(`  installed: ${installedText}`);
+  }
+}
+
+function installForTargets(skillNames, targets, yes) {
+  const results = [];
+
+  for (const target of targets) {
+    ensureDir(target.skillsDir);
+    for (const skillName of skillNames) {
+      const installedPath = installSkill(skillName, target.skillsDir, yes);
+      results.push({
+        target: target.key,
+        label: target.label,
+        skill: skillName,
+        path: installedPath
+      });
+    }
+  }
+
+  return results;
+}
+
+function printInstallResults(results) {
+  for (const item of results) {
+    console.log(`Installed ${item.skill} for ${item.label} -> ${item.path}`);
+  }
+  console.log("Done. Restart your AI tools if they cache installed skills.");
 }
 
 function main() {
@@ -95,15 +197,17 @@ function main() {
   }
 
   if (args.command === "list") {
-    if (skills.length === 0) {
-      console.log("No skills bundled in this package.");
-      return;
-    }
+    printAvailableSkills(skills);
+    return;
+  }
 
-    console.log("Available Central Brain skills:");
-    for (const skill of skills) {
-      console.log(`- ${skill}`);
-    }
+  if (args.command === "list-targets") {
+    printTargets();
+    return;
+  }
+
+  if (args.command === "status") {
+    targetStatus(skills);
     return;
   }
 
@@ -112,12 +216,10 @@ function main() {
       throw new Error("No installable skills found in this package.");
     }
 
-    const targets = args.skill ? [args.skill] : skills;
-    for (const skillName of targets) {
-      installSkill(skillName, args.dest, args.yes);
-    }
-
-    console.log(`Done. Restart your AI tool if it caches installed skills.`);
+    const skillNames = args.skill ? [args.skill] : skills;
+    const targets = resolveTargets(args);
+    const results = installForTargets(skillNames, targets, args.yes);
+    printInstallResults(results);
     return;
   }
 

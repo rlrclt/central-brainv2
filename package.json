@@ -1,9 +1,10 @@
 {
-  "name": "central-brain-skills",
+  "name": "brain-skills",
   "version": "0.1.0",
-  "description": "CLI installer for Central Brain AI skills",
+  "description": "CLI installer for Central Brain AI skills across Codex, Claude, and Gemini",
   "type": "module",
   "bin": {
+    "brain-skills": "./bin/central-brain-skills.js",
     "central-brain-skills": "./bin/central-brain-skills.js"
   },
   "files": [
